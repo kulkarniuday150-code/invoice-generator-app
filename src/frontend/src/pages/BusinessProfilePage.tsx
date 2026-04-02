@@ -18,7 +18,7 @@ import {
 
 export default function BusinessProfilePage() {
   const _navigate = useNavigate();
-  const { isFetching: actorFetching } = useActor();
+  const { actor, isFetching: actorFetching } = useActor();
   const { data: profile, isLoading: profileLoading } = useBusinessProfile();
   const { data: _userProfile } = useGetCallerUserProfile();
   const saveProfile = useSaveBusinessProfile();
@@ -69,6 +69,10 @@ export default function BusinessProfilePage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!actor) {
+      toast.error("Backend not ready yet. Please wait a moment and try again.");
+      return;
+    }
     if (!businessName.trim()) {
       toast.error("Business name is required");
       return;
@@ -287,8 +291,18 @@ export default function BusinessProfilePage() {
           </Card>
         )}
 
-        <Button type="submit" disabled={isSaving} className="w-full">
-          {isSaving ? (
+        <Button
+          type="submit"
+          disabled={isSaving || actorFetching || !actor}
+          className="w-full"
+          data-ocid="profile.submit_button"
+        >
+          {actorFetching && !actor ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Connecting...
+            </>
+          ) : isSaving ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Saving...
